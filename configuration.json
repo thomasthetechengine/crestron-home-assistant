@@ -1,0 +1,52 @@
+{
+    "CrestronConfig": {
+        "Host": "192.168.0.241",
+        "IPID": "03"
+    },
+    "HomeAssistantConfig": {
+        "Host": "192.168.30.10",
+        "Port": "8123",
+        "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjOTEyNDVlYjM3OGU0OGYyYjJmMDZlOWMyNDIxOTRhYSIsImlhdCI6MTcyNDcwNTU0MSwiZXhwIjoyMDQwMDY1NTQxfQ.dMLcX7tWQHI18QolSJmrkT0gs7PnDiGqMWt_6SDoycU",
+        "Protocol": "ws"
+    },
+    "EntityGet": "",
+    "Debug": true,
+    "Entities": {
+        "switch.example": {
+            "Type": "switch",
+            "AutoUpdate": "HomeAssistant",
+            "switch": "D3",
+            "switchtype": "pulse"
+        },
+        "light.example": {
+            "Type": "light",
+            "AutoUpdate": "HomeAssistant",
+            "switch": "D1",
+            "switchtype": "pulse",
+            "Attributes": {
+                "brightness": "A4",
+                "color_temp_kelvin": "A5",
+                "rgb_color": ["A1","A2","A3"],
+                "effect": "S3"
+            },
+            "Ranges": {
+                "brightness": [1,255],
+                "color_temp_kelvin": [2700,6500]
+            },
+            "RefreshWhenOff":{
+                "brightness": true
+            }
+        },
+        "select.example": {
+            "Type": "select",
+            "AutoUpdate": "HomeAssistant",
+            "state": "S1",
+            "ServiceTypes":{
+                "state": "select_option"
+            },
+            "AttributeTranslate": {
+                "state": "option"
+            }
+        }
+    }
+}
