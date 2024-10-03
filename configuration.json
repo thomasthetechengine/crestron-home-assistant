@@ -1,12 +1,12 @@
 {
     "CrestronConfig": {
-        "Host": "192.168.0.241",
+        "Host": "192.168.0.2",
         "IPID": "03"
     },
     "HomeAssistantConfig": {
-        "Host": "192.168.30.10",
+        "Host": "192.168.0.1",
         "Port": "8123",
-        "Token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjOTEyNDVlYjM3OGU0OGYyYjJmMDZlOWMyNDIxOTRhYSIsImlhdCI6MTcyNDcwNTU0MSwiZXhwIjoyMDQwMDY1NTQxfQ.dMLcX7tWQHI18QolSJmrkT0gs7PnDiGqMWt_6SDoycU",
+        "Token": "",
         "Protocol": "ws"
     },
     "EntityGet": "",
