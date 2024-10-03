@@ -10,8 +10,6 @@
   "license": "MIT",
   "dependencies": {
     "child_process": "^1.0.2",
-    "fs": "^0.0.1-security",
-    "homeassistant": "^0.2.0",
     "node-homeassistant": "^1.6.0",
     "promisify-child-process": "^4.1.2"
   }
