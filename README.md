@@ -81,3 +81,10 @@ Entity (Entities):
             }
         }
 ```
+
+# SIMPL Examples
+
+![image](https://github.com/user-attachments/assets/d5c90545-5138-4bac-8f8a-8e281ab30ac2)
+
+![image](https://github.com/user-attachments/assets/59db1b47-21bf-4398-a8ee-d9fa43f2347b)
+
