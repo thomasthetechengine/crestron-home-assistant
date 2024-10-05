@@ -548,18 +548,20 @@ ha.connect().then(async () => {
     for (var DeviceName in Entities) { //Subscribe to device changes from HA
         //Startup to grab new states
         var Device = Entities[DeviceName]
-        if (Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
+        if (DeviceName && Device && Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(500)
             var FromHA = ha.state(DeviceName)
-            var HomeAssistData = {
-                entity_id: FromHA.entity_id,
-                state: FromHA.state,
-                new_state: FromHA
+            if(FromHA["entity_id"]){
+                var HomeAssistData = {
+                    entity_id: FromHA.entity_id,
+                    state: FromHA.state,
+                    new_state: FromHA
+                }
+                // console.log(DeviceName)
+                //console.log(HomeAssistData)
+                UpdateFromHomeAssistant(DeviceName, HomeAssistData, true)
             }
-            // console.log(DeviceName)
-            //console.log(HomeAssistData)
-            UpdateFromHomeAssistant(DeviceName, HomeAssistData, true)
         }
 
 
