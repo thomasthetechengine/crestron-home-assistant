@@ -94,3 +94,6 @@ Entity (Entities):
 
 ![image](https://github.com/user-attachments/assets/91216ea5-209c-4b2b-9140-727243f96c33)
 
+# A very bad flowchart example
+
+![image](https://github.com/user-attachments/assets/1392181a-5d72-4af2-8270-e99dcb7426f5)
