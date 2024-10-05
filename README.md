@@ -79,5 +79,5 @@ Entity (Entities):
             "AttributeTranslate": { // Translates one attribute type into another when sending service calls, certain entities send attributes as different properties, but expect different ones when updated with a service call.
                 "state": "option"
             }
-        }
+        },
 ```
