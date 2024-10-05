@@ -88,3 +88,9 @@ Entity (Entities):
 
 ![image](https://github.com/user-attachments/assets/59db1b47-21bf-4398-a8ee-d9fa43f2347b)
 
+![image](https://github.com/user-attachments/assets/39e7938e-0a42-4e43-8294-536383588bee)
+
+![image](https://github.com/user-attachments/assets/bba598dc-81e4-4e19-babd-8f07d9e820ba)
+
+![image](https://github.com/user-attachments/assets/91216ea5-209c-4b2b-9140-727243f96c33)
+
