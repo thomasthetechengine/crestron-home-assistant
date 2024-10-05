@@ -4,6 +4,7 @@ Connects Crestron controllers to Home Assistant via a Node JS Webserver
 # Crestron Controller Setup
 
 This node js server mimics a crestron panel, in your controller, assign one of your IP ID's to an XPanel, which this node js server will be sending and recieving from
+
 ![image](https://github.com/user-attachments/assets/11d81a67-4470-4600-83b8-7dd5f78ee713)
 
 When creating analog sliders / inputs on your touch panels, keep the maxmium value to 255, since anything higher breaks the plugin, use the `Ranges` option on your entites in `configuration.json` to convert the value to a different range.
