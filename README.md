@@ -61,7 +61,7 @@ Entity (Entities):
                 "rgb_color": ["A1","A2","A3"], -- R = Analog Join 1, G = Analog Join 2, B = Analog Join 3
                 "effect": "S3" - Serial Join ID 3
             },
-            "Ranges": { -- Analog joins can only send values between 1 and 255, ranges covnerts the values from crestron back into different specificed numbers.
+            "Ranges": { -- Analog joins can only send values between 1 and 255, ranges converts the values from crestron back into different specificed numbers.
                 "brightness": [1,255],
                 "color_temp_kelvin": [2700,6500]
             },
