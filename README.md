@@ -14,6 +14,8 @@ Download project source, and extract the files to a memorable destination.
 
 Edit configuration.json to match your Home Assistant server, and your Crestron Controller
 
+There is no need to point Crestron or Home Assistant to this web server, the only IP addresses that need to be entered are in `configuration.json`, everything is able to talk over different subnets, providing there is an accessible route between them.
+
 Install all the packages in package.json
 
 Navigate to the directory via Terminal (Or command prompt for windows)
