@@ -1,6 +1,8 @@
 # crestron-home-assistant
 Connects Crestron controllers to Home Assistant via a Node JS Webserver
 
+This plugin is designed for Home Assistant to be the back-end, and Crestron to be used as a front-end interface for users, however logic gates on controllers can still be implemented to certain entities, but can cause syncing issues between states. Any join can be linked to any attribute or state of a entity in home assistant, for example I have an input_boolean, which is the helper equivalent of a switch, triggering some relays on my Crestron controller (CP2E), which allows me to open and close my relays on my controller from Home Assistant.
+
 # Crestron Controller Setup
 
 This node js server mimics a crestron panel, in your controller, assign one of your IP ID's to an XPanel, which this node js server will be sending and recieving from
