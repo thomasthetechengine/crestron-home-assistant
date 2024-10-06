@@ -34,7 +34,7 @@ Debug: Enables debug output on the CLI
 
 Join Types:
 ```
-D = Digital (true or false)
+D = Digital (0 or 1 (0 for false, 1 for true))
 A = Analog (1-255)
 S = Serial (Strings "Hello there!)
 
