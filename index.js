@@ -577,6 +577,3 @@ ha.connect().then(async () => {
     })
 })
 
-
-
-
