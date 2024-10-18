@@ -12,6 +12,11 @@
     "EntityGet": "",
     "Debug": true,
     "Entities": {
+        "input_button.example": {
+            "Type": "input_button",
+            "AutoUpdate": "HomeAssistant",
+            "press": "D2"
+        },
         "switch.example": {
             "Type": "switch",
             "AutoUpdate": "HomeAssistant",
