@@ -235,6 +235,21 @@ const DeviceFunctions = { // Functions per device
         }
     },
 
+    press: function (Entity, CrestronData) { // HA Press
+        ha.call({
+            domain: Entity.DeviceType,
+            service: "press",
+            target: {
+                "entity_id": Entity.Device
+            }
+        }).then(res => {
+            if (config.Debug) {
+                console.log("Call feedback: ", res)
+            }
+        })
+    },
+
+
     rgb: function (Entity, CrestronData) { // RGB Specific function for RGB bulbs
         var RGB = RGBTemporaryTemplate
         RGBTemporaryTemplate = {
@@ -494,7 +509,7 @@ function UpdateFromCrestron(data) {
                     DeviceFunctions[Response.Property](Response, data, Response.Property)
                 }
             } else {
-                if (data.type === "digital" && Entities[Response.Device]["switchtype"] && Entities[Response.Device].switchtype === "pulse") {
+                if (data.type === "digital" && Response.Property === "switch" && Entities[Response.Device]["switchtype"] && Entities[Response.Device].switchtype === "pulse") {
                     if (typeof SentCache.Digital[data.join] === null) {
                         SentCache.Digital[data.join] = 0
                     }
@@ -508,7 +523,11 @@ function UpdateFromCrestron(data) {
                     SetDigital(data.join, data.value)
                     DeviceFunctions.Property(Response, data, Response.Property)
                 } else {
-                    DeviceFunctions.Property(Response, data, Response.Property)
+                    if (data.type === "digital" && Response.Property === "press" && Entities[Response.Device]["press"]) {
+                        DeviceFunctions.press(Response, data, Response.Property)
+                    }else{
+                        DeviceFunctions.Property(Response, data, Response.Property)
+                    }
                 }
 
             }
@@ -576,4 +595,7 @@ ha.connect().then(async () => {
         UpdateFromCrestron(data)
     })
 })
+
+
+
 
