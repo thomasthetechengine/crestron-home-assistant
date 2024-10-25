@@ -180,7 +180,12 @@ let ha = new Homeassistant({ // Log into HA
 })
 
 // Connect to Crestron
-const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: String.fromCharCode(config.CrestronConfig.IPID) }, () => {
+var str = config.CrestronConfig.IPID
+var code = ""
+for (let i = 0; i < str.length; i++) {
+    code =  code+String.fromCharCode(str.charAt(i))
+}
+const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: code }, () => {
     console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
 })
 
@@ -571,7 +576,7 @@ ha.connect().then(async () => {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(500)
             var FromHA = ha.state(DeviceName)
-            if(FromHA["entity_id"]){
+            if(FromHA && FromHA["entity_id"]){
                 var HomeAssistData = {
                     entity_id: FromHA.entity_id,
                     state: FromHA.state,
