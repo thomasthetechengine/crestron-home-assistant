@@ -10,7 +10,7 @@ Some bits of code are quite messy, and I'm expecting there to be obvious bugs wh
 
 # Crestron Controller Setup
 
-This node js server mimics a crestron panel, in your controller, assign one of your IP ID's to an XPanel, which this node js server will be sending and recieving from
+This node js server mimics a crestron panel, in your controller, assign one of your IP ID's to an XPanel, which this node js server will be sending and recieving from. Due to a bug you can only use single digit IP ID numbers.
 
 ![image](https://github.com/user-attachments/assets/11d81a67-4470-4600-83b8-7dd5f78ee713)
 
