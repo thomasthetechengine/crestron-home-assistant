@@ -185,7 +185,7 @@ var code = ""
 for (let i = 0; i < str.length; i++) {
     code =  code+String.fromCharCode(str.charAt(i))
 }
-const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: code }, () => {
+const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: String.fromCharCode(config.CrestronConfig.IPID) }, () => {
     console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
 })
 
