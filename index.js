@@ -241,17 +241,19 @@ const DeviceFunctions = { // Functions per device
     },
 
     press: function (Entity, CrestronData) { // HA Press
-        ha.call({
-            domain: Entity.DeviceType,
-            service: "press",
-            target: {
-                "entity_id": Entity.Device
-            }
-        }).then(res => {
-            if (config.Debug) {
-                console.log("Call feedback: ", res)
-            }
-        })
+        if (CrestronData.value === 1) {
+            ha.call({
+                domain: Entity.DeviceType,
+                service: "press",
+                target: {
+                    "entity_id": Entity.Device
+                }
+            }).then(res => {
+                if (config.Debug) {
+                    console.log("Call feedback: ", res)
+                }
+            })
+        }
     },
 
 
@@ -528,7 +530,7 @@ function UpdateFromCrestron(data) {
                     SetDigital(data.join, data.value)
                     DeviceFunctions.Property(Response, data, Response.Property)
                 } else {
-                    if (data.type === "digital" && Response.Property === "press" && Entities[Response.Device]["press"]) {
+                    if (data.type === "digital" && Response.Property === "press" && Entities[Response.Device]["press"] && data.value === 1) {
                         DeviceFunctions.press(Response, data, Response.Property)
                     }else{
                         DeviceFunctions.Property(Response, data, Response.Property)
