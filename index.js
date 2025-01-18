@@ -479,11 +479,39 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
 
 }
 
+async function ManuallyUpdateAllFromHA() {
+    for (var DeviceName in Entities) { //Subscribe to device changes from HA
+        //Startup to grab new states
+        var Device = Entities[DeviceName]
+        if (DeviceName && Device && Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+            await sleep(100)
+            var FromHA = ha.state(DeviceName)
+            if(FromHA && FromHA["entity_id"]){
+                var HomeAssistData = {
+                    entity_id: FromHA.entity_id,
+                    state: FromHA.state,
+                    new_state: FromHA
+                }
+                // console.log(DeviceName)
+                //console.log(HomeAssistData)
+                UpdateFromHomeAssistant(DeviceName, HomeAssistData, true)
+            }
+        }
+
+    }
+}
+
 function UpdateFromCrestron(data) {
     if (data.type === "digital") {
         //if (RecievedCache.Digital[data.join] === data.value) return
         RecievedCache.Digital[data.join] = data.value
         //SetDigital(data.join, data.value)
+        if (config["Reset"] && String(data.join) === config.Reset && data.value === 1){
+            console.log("Recieved Reset Join")
+            ManuallyUpdateAllFromHA()
+            return
+        }
     }
     if (data.type === "analog") {
         if (RecievedCache.Analog[data.join] === data.value) return
@@ -576,7 +604,7 @@ ha.connect().then(async () => {
         var Device = Entities[DeviceName]
         if (DeviceName && Device && Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-            await sleep(500)
+            await sleep(100)
             var FromHA = ha.state(DeviceName)
             if(FromHA && FromHA["entity_id"]){
                 var HomeAssistData = {
