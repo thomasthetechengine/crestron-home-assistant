@@ -41,6 +41,8 @@ EntityGet: Pulls the state of the specified entity, and outputs it to a txt file
 
 Debug: Enables debug output on the CLI
 
+Restart: Digital join, when set to high will refresh all device states from home assistant into crestron.
+
 Join Types:
 ```
 D = Digital (0 or 1 (0 for false, 1 for true))
