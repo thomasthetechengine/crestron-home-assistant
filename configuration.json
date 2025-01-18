@@ -11,6 +11,7 @@
     },
     "EntityGet": "",
     "Debug": true,
+    "Reset": "999",
     "Entities": {
         "input_button.example": {
             "Type": "input_button",
