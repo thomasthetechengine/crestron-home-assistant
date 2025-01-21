@@ -43,6 +43,8 @@ Debug: Enables debug output on the CLI
 
 Restart: Digital join, when set to high will refresh all device states from home assistant into crestron.
 
+CustomServiceCalls: Can be used so when a digital join is recieved, it can trigger custom service calls into home assistant, I added this feature to use with my alarm, which intergrates with home assistant. Very useful when states cant be 1:1 mapped with service calls. See example in the configuration.json file.
+
 Join Types:
 ```
 D = Digital (0 or 1 (0 for false, 1 for true))
