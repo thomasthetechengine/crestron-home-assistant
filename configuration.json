@@ -12,6 +12,17 @@
     "EntityGet": "",
     "Debug": true,
     "Reset": "999",
+    "CustomServiceCalls":{
+        "D69": {
+            "domain": "alarm_control_panel",
+            "service": "alarm_disarm",
+            "entity_id": "alarm_control_panel.house",
+            "ServiceDataUsesJoins": true,
+            "service_data": {
+                "code": "S21"
+            }
+        },
+    },
     "Entities": {
         "input_button.example": {
             "Type": "input_button",
