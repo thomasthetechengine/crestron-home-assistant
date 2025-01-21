@@ -183,7 +183,7 @@ let ha = new Homeassistant({ // Log into HA
 var str = config.CrestronConfig.IPID
 var code = ""
 for (let i = 0; i < str.length; i++) {
-    code =  code+String.fromCharCode(str.charAt(i))
+    code = code + String.fromCharCode(str.charAt(i))
 }
 const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: String.fromCharCode(config.CrestronConfig.IPID) }, () => {
     console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
@@ -437,11 +437,11 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === true) Set2 = 1
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === false) Set2 = 0
                                     SetDigital(ID, Set2)
-                                } else{
+                                } else {
                                     if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName][i]) }
                                 }
                             }
-                            
+
                         }
                     }
                 }
@@ -487,7 +487,7 @@ async function ManuallyUpdateAllFromHA() {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(100)
             var FromHA = ha.state(DeviceName)
-            if(FromHA && FromHA["entity_id"]){
+            if (FromHA && FromHA["entity_id"]) {
                 var HomeAssistData = {
                     entity_id: FromHA.entity_id,
                     state: FromHA.state,
@@ -502,14 +502,51 @@ async function ManuallyUpdateAllFromHA() {
     }
 }
 
+async function CustomServiceCall(CrestronData) {
+    delete require.cache[require.resolve('./configuration.json')]
+    config = require('./configuration.json');
+    let ServiceCalls = config.CustomServiceCalls
+    let CallData = ServiceCalls["D" + String(CrestronData.join)]
+    let sdata = CallData.service_data
+    if (CallData.ServiceDataUsesJoins) {
+        for (let valuename in sdata) {
+            let Value = sdata[valuename]
+            if (Value){
+            let ID = Value.substring(1, Value.length)
+            let JoinType = Value.substring(0, 1)
+            if (JoinType === "D") {sdata[valuename] = RecievedCache.Digital[ID]}
+            if (JoinType === "A") {sdata[valuename] = RecievedCache.Analog[ID]}
+            if (JoinType === "S") {sdata[valuename] = RecievedCache.Serial[ID]}
+            }
+            
+        }
+    }
+    ha.call({
+        domain: CallData.domain,
+        service: CallData.service,
+        target: {
+            "entity_id": CallData.entity_id
+        },
+        service_data: sdata
+    }).then(res => {
+        if (config.Debug) {
+            console.log("Call feedback: ", res)
+        }
+    })
+}
+
 function UpdateFromCrestron(data) {
     if (data.type === "digital") {
         //if (RecievedCache.Digital[data.join] === data.value) return
         RecievedCache.Digital[data.join] = data.value
         //SetDigital(data.join, data.value)
-        if (config["Reset"] && String(data.join) === config.Reset && data.value === 1){
+        if (config["Reset"] && String(data.join) === config.Reset && data.value === 1) {
             console.log("Recieved Reset Join")
             ManuallyUpdateAllFromHA()
+            return
+        }
+        if (config["CustomServiceCalls"] && data.value === 1 && config.CustomServiceCalls["D" + String(data.join)]) {
+            CustomServiceCall(data)
             return
         }
     }
@@ -560,7 +597,7 @@ function UpdateFromCrestron(data) {
                 } else {
                     if (data.type === "digital" && Response.Property === "press" && Entities[Response.Device]["press"] && data.value === 1) {
                         DeviceFunctions.press(Response, data, Response.Property)
-                    }else{
+                    } else {
                         DeviceFunctions.Property(Response, data, Response.Property)
                     }
                 }
@@ -606,7 +643,7 @@ ha.connect().then(async () => {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(100)
             var FromHA = ha.state(DeviceName)
-            if(FromHA && FromHA["entity_id"]){
+            if (FromHA && FromHA["entity_id"]) {
                 var HomeAssistData = {
                     entity_id: FromHA.entity_id,
                     state: FromHA.state,
