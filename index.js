@@ -207,7 +207,7 @@ function SetSerial(Join, Value) { // Setting analog values + debug output
     //if (SentCache.Serial[Join] === Value) return
     SentCache.Serial[Join] = Value
     if (config.Debug) { console.log(`Setting serial join ${String(Join)} to: ${String(Value)}`) }
-    cip.sset(Join, Value)
+    cip.sset(Join, String(Value))
 }
 
 const DeviceFunctions = { // Functions per device
