@@ -19,8 +19,11 @@ When creating analog sliders / inputs on your touch panels, keep the maxmium val
 # Known Bugs
 
 The IP ID of the plugin can only be a singular digit
+
 Analog values can only be sent from 0 to 255 (8 bit), but can be converted by the plugin using the Ranges option (See configuration examples below)
+
 There is no current way to get the state of a join from crestron, only subscribe to its updates.
+
 Updating configuration.json sometimes requires a restart of the plugin to take full effect.
 
 # Setup
