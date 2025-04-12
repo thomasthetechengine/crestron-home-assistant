@@ -27,18 +27,18 @@
     "Entities": {
         "input_button.example": {
             "Type": "input_button",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "press": "D2"
         },
         "switch.example": {
             "Type": "switch",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "switch": "D3",
             "switchtype": "pulse"
         },
         "light.example": {
             "Type": "light",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "switch": "D1",
             "switchtype": "pulse",
             "Attributes": {
@@ -57,7 +57,7 @@
         },
         "select.example": {
             "Type": "select",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "state": "S1",
             "ServiceTypes":{
                 "state": "select_option"
