@@ -47,6 +47,8 @@ Then to run the server, in your CLI, type `forever .`
 
 # Configuration Guide
 
+It is recommended to make a new user on home assistant which will be making all the calls from crestron, if using UpdateFrom with Crestron set, you must also define the id of the user in configuration.json
+
 EntityGet: Pulls the state of the specified entity, and outputs it to a txt file. Useful for creating configs for devices.
 
 Debug: Enables debug output on the CLI
