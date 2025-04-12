@@ -31,6 +31,8 @@ Download project source, and extract the files to a memorable destination.
 
 Edit configuration.json to match your Home Assistant server, and your Crestron Controller
 
+It is recommended to make a new user on home assistant which will be making all the calls from crestron, if using UpdateFrom with Crestron set, you must also define the id of the user in configuration.json
+
 There is no need to point Crestron or Home Assistant to this web server, the only IP addresses that need to be entered are in `configuration.json`, everything is able to talk over different subnets, providing there is an accessible route between them.
 
 Install all the packages in package.json
@@ -47,7 +49,6 @@ Then to run the server, in your CLI, type `forever .`
 
 # Configuration Guide
 
-It is recommended to make a new user on home assistant which will be making all the calls from crestron, if using UpdateFrom with Crestron set, you must also define the id of the user in configuration.json
 
 EntityGet: Pulls the state of the specified entity, and outputs it to a txt file. Useful for creating configs for devices.
 
