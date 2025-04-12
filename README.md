@@ -73,7 +73,7 @@ Entity (Entities):
 ```json
 "switch.example": { -- Needs to match the exact name in HA
             "Type": "switch", -- Type of device
-            "UpdateFrom": "HomeAssistant", -- What end controls this device, when set to home assistant, if set to HomeAssistant, on startup home assistant will update the joins appropriately. However if you have a device that is controlled by crestron, and using HA as a frontend, setting this value to Crestron will allow crestron to be the main point of control, and prevent feedback loops. You must also set the UserID in configuration.json aswell.
+            "UpdateFrom": "HomeAssistant", -- What end controls this device, if set to HomeAssistant, on startup home assistant will update the joins appropriately. However if you have a device that is controlled by crestron logic, for example a RS232 Relay board, setting this value to Crestron will allow crestron to be the main point of control, and prevent feedback loops. You must also set the UserID in configuration.json aswell.
             "switch": "D3", -- Which join to link to the switch D = Digtial, 3 = Join ID
             "switchtype": "pulse" -- What type of value does the node js server expect from crestron, pulse is for digital joins direct from a button, toggle is for joins that go through a toggle gate
         },
