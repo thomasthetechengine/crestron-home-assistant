@@ -74,20 +74,34 @@ async function FindJoin(Device, DeviceType, Property, Position) { // Pulls the s
     if (Cache[Device + DeviceType + Property]) return Cache[Device + DeviceType + Property]
     if (!Entities[Device]) return "No device"
 
+    if (Property === "press" || Property === "switch"){
+        if (Entities[Device][Property]) {
+            Value = Entities[Device][Property]
+            Attribute = false
+            var ID = Value.substring(1, Value.length)
+            var JoinType = Value.substring(0, 1)
+            Cache[Device + DeviceType + Property] = { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property], Device: Entities[Device] }
+            return { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property], Device: Entities[Device] }
+        } else {
+            return "Invalid Join"
+        }
+    }
+
     if ((Property === "R" || Property === "G" || Property === "B") && !Entities[Device].Attributes.rgb) return "No property"
-    if (Property !== "switch" && Property !== "R" && Property !== "G" && Property !== "B" && !Entities[Device].Attributes[Property]) return "No property1"
-    if (Property === "switch" && Property !== "R" && Property !== "G" && Property !== "B" && !Entities[Device][Property]) return "No property2"
+    if ((Property !== "press" || Property !== "switch") && Property !== "R" && Property !== "G" && Property !== "B" && !Entities[Device].Attributes[Property]) return "No property1"
+    if ((Property === "press" || Property === "switch") && Property !== "R" && Property !== "G" && Property !== "B" && !Entities[Device][Property]) return "No property2"
+
 
     var Value
     var Attribute = true
     if (Entities[Device][Property]) {
         Value = Entities[Device][Property]
         Attribute = false
-    } else {
-        if (Entities[Device].Attributes[Property]) {
+    } else { 
+        if (Entities[Device]['Attributes'] !== null && Entities[Device].Attributes[Property] !== null) {
             Value = Entities[Device].Attributes[Property]
         } else {
-            if (Entities[Device].Attributes[Property] && typeof Entities[Device].Attributes[Property] === "object" && Entities[Device].Attributes[Property][0]) {
+            if (Entities[Device]['Attributes'] !== null && Entities[Device].Attributes[Property] !== null && typeof Entities[Device].Attributes[Property] === "object" && Entities[Device].Attributes[Property][0] !== null) {
                 if (Position) {
                     Value = Entities[Device].Attributes[Property][Position]
                 }
@@ -100,11 +114,11 @@ async function FindJoin(Device, DeviceType, Property, Position) { // Pulls the s
     var JoinType = Value.substring(0, 1)
     if (!TypeTable[JoinType]) return "Invalid Join"
     if (Attribute) {
-        Cache[Device + DeviceType + Property] = { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device].Attributes[Property] }
-        return { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device].Attributes[Property] }
+        Cache[Device + DeviceType + Property] = { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device].Attributes[Property], Device: Entities[Device] }
+        return { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device].Attributes[Property], Device: Entities[Device] }
     } else {
-        Cache[Device + DeviceType + Property] = { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property] }
-        return { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property] }
+        Cache[Device + DeviceType + Property] = { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property], Device: Entities[Device] }
+        return { ID: ID, JoinType: TypeTable[JoinType], Property: Entities[Device][Property], Device: Entities[Device] }
     }
 }
 
@@ -380,12 +394,33 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
             HACache[Name].state === "off"
         }
     }
+    if (Type === "button" || Type === "input_button"){
+        FindJoin(Name, Type, "press").then(async (Join) => {
+            if (Join) {
+                if (typeof Join === "string") return;
+                if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                    if (Join.JoinType === "digital") { 
+                        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+                        SetDigital(Join.ID, 1)
+                        await sleep(100)
+                        SetDigital(Join.ID, 0)
+                     }
+                }
+    
+            }
+        })
+        return
+    }
+
     FindJoin(Name, Type, "switch").then(async (Join) => {
         if (Join) {
             if (typeof Join === "string") return;
             var value = 0
             if (HomeAssistData.new_state.state === 'on') { value = 1 };
-            if (Join.JoinType === "digital") { SetDigital(Join.ID, value) }
+            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                if (Join.JoinType === "digital") { SetDigital(Join.ID, value) }
+            }
+
         }
     })
     for (var MajorPropertyName in Entities[Device]) {
@@ -407,9 +442,11 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                 if (HomeAssistData.new_state[MajorPropertyName] === true) Set2Init = 1
                 if (HomeAssistData.new_state[MajorPropertyName] === false) Set2Init = 0
             }
-            if (JoinType === "S") { Set = HomeAssistData.new_state[MajorPropertyName]; SetSerial(ID, Set) }
-            if (JoinType === "D") { SetDigital(ID, Set2Init) }
-            if (JoinType === "A") { SetAnalog(ID, Set) }
+            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                if (JoinType === "S") { Set = HomeAssistData.new_state[MajorPropertyName]; SetSerial(ID, Set) }
+                if (JoinType === "D") { SetDigital(ID, Set2Init) }
+                if (JoinType === "A") { SetAnalog(ID, Set) }
+            }
         }
     }
     if (Entities[Device] && Entities[Device]["Attributes"]) {
@@ -430,15 +467,24 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                                 } else {
                                     Set = HomeAssistData.new_state.attributes[PropertyName][i]
                                 }
-                                SetAnalog(ID, Set)
+                                if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                    SetAnalog(ID, Set)
+                                }
+
                             } else {
                                 var Set2
                                 if (JoinType === "D") {
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === true) Set2 = 1
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === false) Set2 = 0
-                                    SetDigital(ID, Set2)
+                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                        SetDigital(ID, Set2)
+                                    }
+
                                 } else {
-                                    if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName][i]) }
+                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                        if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName][i]) }
+                                    }
+
                                 }
                             }
 
@@ -457,15 +503,21 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                         } else {
                             Set = HomeAssistData.new_state.attributes[PropertyName]
                         }
-                        SetAnalog(ID, Set)
+                        if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                            SetAnalog(ID, Set)
+                        }
                     } else {
                         var Set2
                         if (JoinType === "D") {
                             if (HomeAssistData.new_state.attributes[PropertyName] === true) Set2 = 1
                             if (HomeAssistData.new_state.attributes[PropertyName] === false) Set2 = 0
-                            SetDigital(ID, Set2)
+                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                SetDigital(ID, Set2)
+                            }
                         } else {
-                            if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName]) }
+                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName]) }
+                            }
                         }
                     }
 
@@ -483,7 +535,7 @@ async function ManuallyUpdateAllFromHA() {
     for (var DeviceName in Entities) { //Subscribe to device changes from HA
         //Startup to grab new states
         var Device = Entities[DeviceName]
-        if (DeviceName && Device && Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
+        if (DeviceName && Device && Device["UpdateFrom"] !== null && Device.UpdateFrom === "HomeAssistant") {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(100)
             var FromHA = ha.state(DeviceName)
@@ -511,14 +563,14 @@ async function CustomServiceCall(CrestronData) {
     if (CallData.ServiceDataUsesJoins) {
         for (let valuename in sdata) {
             let Value = sdata[valuename]
-            if (Value){
-            let ID = Value.substring(1, Value.length)
-            let JoinType = Value.substring(0, 1)
-            if (JoinType === "D") {sdata[valuename] = RecievedCache.Digital[ID]}
-            if (JoinType === "A") {sdata[valuename] = RecievedCache.Analog[ID]}
-            if (JoinType === "S") {sdata[valuename] = RecievedCache.Serial[ID]}
+            if (Value) {
+                let ID = Value.substring(1, Value.length)
+                let JoinType = Value.substring(0, 1)
+                if (JoinType === "D") { sdata[valuename] = RecievedCache.Digital[ID] }
+                if (JoinType === "A") { sdata[valuename] = RecievedCache.Analog[ID] }
+                if (JoinType === "S") { sdata[valuename] = RecievedCache.Serial[ID] }
             }
-            
+
         }
     }
     ha.call({
@@ -605,10 +657,13 @@ function UpdateFromCrestron(data) {
             }
         }
         // Runs device function to update device on HA
-        if (data.type === "digital") { SetDigital(data.join, data.value) } // Sends the digital join to the feedback join temporarily, before HA confirms the state
-        if (data.type === "analog") { SetAnalog(data.join, data.value) } // Sends the analog join to the feedback join
-        // if (data.type === "serial") { SetSerial(data.join, data.value) } // Sends the serial join to the feedback join
+        if (Entities[Response.Device]["UpdateFrom"] !== null && Entities[Response.Device].UpdateFrom === "Crestron") { // Only sends join feedback to crestron if data origniated from HA, otherwise causes looped feedback
 
+        } else {
+            if (data.type === "digital") { SetDigital(data.join, data.value) } // Sends the digital join to the feedback join temporarily, before HA confirms the state
+            if (data.type === "analog") { SetAnalog(data.join, data.value) } // Sends the analog join to the feedback join
+            // if (data.type === "serial") { SetSerial(data.join, data.value) } // Sends the serial join to the feedback join
+        }
     })
 
 
@@ -639,7 +694,7 @@ ha.connect().then(async () => {
     for (var DeviceName in Entities) { //Subscribe to device changes from HA
         //Startup to grab new states
         var Device = Entities[DeviceName]
-        if (DeviceName && Device && Device["AutoUpdate"] !== null && Device.AutoUpdate === "HomeAssistant") {
+        if (DeviceName && Device && Device["UpdateFrom"] !== null && Device.UpdateFrom === "HomeAssistant") {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(100)
             var FromHA = ha.state(DeviceName)
@@ -653,13 +708,15 @@ ha.connect().then(async () => {
                 //console.log(HomeAssistData)
                 UpdateFromHomeAssistant(DeviceName, HomeAssistData, true)
             }
+
+
         }
 
-
-
         ha.on('state:' + DeviceName, HomeAssistData => {
+            console.log(HomeAssistData)
             UpdateFromHomeAssistant(DeviceName, HomeAssistData, false)
         })
+
     }
 
     cip.subscribe((data) => { // Incoming data from Crestron
@@ -667,7 +724,6 @@ ha.connect().then(async () => {
         UpdateFromCrestron(data)
     })
 })
-
 
 
 
