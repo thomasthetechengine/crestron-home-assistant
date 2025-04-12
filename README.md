@@ -71,13 +71,13 @@ Entity (Entities):
 ```json
 "switch.example": { -- Needs to match the exact name in HA
             "Type": "switch", -- Type of device
-            "AutoUpdate": "HomeAssistant", -- Should the state of the device update when the node js server restarts? if so from which source (Crestron not supported yet)
+            "UpdateFrom": "HomeAssistant", -- What end controls this device, when set to home assistant, if set to HomeAssistant, on startup home assistant will update the joins appropriately. However if you have a device that is controlled by crestron, and using HA as a frontend, setting this value to Crestron will allow crestron to be the main point of control, and prevent feedback loops. You must also set the UserID in configuration.json aswell.
             "switch": "D3", -- Which join to link to the switch D = Digtial, 3 = Join ID
             "switchtype": "pulse" -- What type of value does the node js server expect from crestron, pulse is for digital joins direct from a button, toggle is for joins that go through a toggle gate
         },
 "light.example": {
             "Type": "light",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "switch": "D1",
             "switchtype": "pulse",
             "Attributes": { -- Different types of attributes, dont know your devices attributes? Put your entity ID into EntityGet to learn them!
@@ -96,7 +96,7 @@ Entity (Entities):
         },
 "select.example": {
             "Type": "select",
-            "AutoUpdate": "HomeAssistant",
+            "UpdateFrom": "HomeAssistant",
             "state": "S2",
             "ServiceTypes":{ -- When updating the attribute of a device, usually "turn_on" is the required service, however certain entities require different service call types.
                 "state": "select_option"
