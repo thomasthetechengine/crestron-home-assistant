@@ -159,7 +159,7 @@ module.exports = {
                 sdataView.setUint16(7, join - 1);
                 sdataView.setUint8(2, 8 + valuelen);
                 sdataView.setUint8(5, 4 + valuelen);
-                console.log(sjoin)
+                //console.log(sjoin)
                 //await sleep(100)
                 client.write(sjoin)
             },
@@ -174,7 +174,7 @@ module.exports = {
             dset: (join, value) => {
                 let djoin = new Uint8Array([0x05, 0x00, 0x06, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00]);
                 let dataView = new DataView(djoin.buffer);
-                console.log(join, value)
+                //console.log(join, value)
                 if (!value)
                     join |= 0x8000;
 
