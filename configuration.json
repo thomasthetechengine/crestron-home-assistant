@@ -8,7 +8,9 @@
         "Port": "8123",
         "Token": "",
         "Protocol": "ws",
-        "UserID": ""
+        "UserID": "",
+        "RetryTimeout": 1000,
+        "RetryCount": 0
     },
     "EntityGet": "",
     "Debug": true,
