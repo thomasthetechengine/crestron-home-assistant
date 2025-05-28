@@ -12,6 +12,7 @@ var HACache = {}
 var Entities = config.Entities
 var EntGot = false
 
+
 // Auto configuration updater
 var ConfigCooldown = false
 fs.watch("configuration.json", (eventType, filename) => {
@@ -32,6 +33,7 @@ fs.watch("configuration.json", (eventType, filename) => {
         })()
     }
 });
+
 
 const TypeTable = { // Quick and easy way to translate from config to Crestron CPI, & Vice Versa
     "A": "analog",
@@ -76,7 +78,7 @@ async function FindJoin(Device, DeviceType, Property, Position) { // Pulls the s
     if (Cache[Device + DeviceType + Property]) return Cache[Device + DeviceType + Property]
     if (!Entities[Device]) return "No device"
 
-    if (Property === "press" || Property === "switch"){
+    if (Property === "press" || Property === "switch") {
         if (Entities[Device][Property]) {
             Value = Entities[Device][Property]
             Attribute = false
@@ -99,7 +101,7 @@ async function FindJoin(Device, DeviceType, Property, Position) { // Pulls the s
     if (Entities[Device][Property]) {
         Value = Entities[Device][Property]
         Attribute = false
-    } else { 
+    } else {
         if (Entities[Device]['Attributes'] !== null && Entities[Device].Attributes[Property] !== null) {
             Value = Entities[Device].Attributes[Property]
         } else {
@@ -188,8 +190,8 @@ async function FindProperty(JoinType, ID) { // Finds a specific property and dev
 let ha = new Homeassistant({ // Log into HA
     host: config.HomeAssistantConfig.Host,
     protocol: config.HomeAssistantConfig.Protocol, // "ws" (default) or "wss" for SSL
-    retryTimeout: 1000, // in ms, default is 5000
-    retryCount: 3, // default is 10, values < 0 mean unlimited
+    retryTimeout: config.HomeAssistantConfig.RetryTimeout, // in ms, default is 5000
+    retryCount: config.HomeAssistantConfig.RetryCount, // default is 10, values < 0 mean unlimited
     //password: 'http_api_password', // api_password is getting depricated by home assistant
     token: config.HomeAssistantConfig.Token, // for now both tokens and api_passwords are suported
     port: config.HomeAssistantConfig.Port
@@ -198,8 +200,38 @@ let ha = new Homeassistant({ // Log into HA
 // Connect to Crestron
 
 const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: CrestronIpId }, () => {
-    console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
+    //console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
 })
+
+
+cip.status((status) => { // Incoming data from Crestron
+    if (status === "registered") {
+        console.log(`Crestron | Registered to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "register request") {
+        console.log(`Crestron | Attempting to register to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "register failed") {
+        console.log(`Crestron | Failed to register to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "disconnected") {
+        console.log(`Crestron | Disconnected from ${config.CrestronConfig.Host}`)
+    }
+    if (status === "socket error") {
+        console.log(`Crestron | Socket Error`)
+    }
+})
+
+
+async function PulseDigital(Join) { // Setting digital values + debug output
+    // if (SentCache.Digital[Join] === Value) return
+    //SentCache.Digital[Join] = Value
+    if (config.Debug) { console.log(`Pulsing digital join ${String(Join)}`) }
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+    cip.dset(Join, 1)
+    await sleep(100)
+    cip.dset(Join, 0)
+}
 
 function SetDigital(Join, Value) { // Setting digital values + debug output
     // if (SentCache.Digital[Join] === Value) return
@@ -221,6 +253,21 @@ function SetSerial(Join, Value) { // Setting analog values + debug output
     if (config.Debug) { console.log(`Setting serial join ${String(Join)} to: ${String(Value)}`) }
     cip.sset(Join, String(Value))
 }
+
+if (config.KeyStrokesEnabled) {
+    const keylogger = require('keylogger.js');
+    var ks = require('node-key-sender');
+    keylogger.start((key, isKeyUp, keyCode) => {
+        //console.log("keyboard event", key, isKeyUp, keyCode, config.KeyStrokes[key]);
+        if (config.KeyStrokes[key]) {
+            var Value = config.KeyStrokes[key]
+            let ID = Value.substring(1, Value.length)
+            PulseDigital(ID)
+        }
+    });
+
+}
+
 
 const DeviceFunctions = { // Functions per device
     switch: function (Entity, CrestronData) { // HA Switches (Also includes switching bulbs, and other entities)
@@ -393,20 +440,20 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
             HACache[Name].state === "off"
         }
     }
-    if (Type === "button" || Type === "input_button"){
+    if (Type === "button" || Type === "input_button") {
         console.log(HomeAssistData)
         FindJoin(Name, Type, "press").then(async (Join) => {
             if (Join) {
                 if (typeof Join === "string") return;
                 if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context['user_id'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
-                    if (Join.JoinType === "digital") { 
+                    if (Join.JoinType === "digital") {
                         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
                         SetDigital(Join.ID, 1)
                         await sleep(100)
                         SetDigital(Join.ID, 0)
-                     }
+                    }
                 }
-    
+
             }
         })
         return
@@ -601,6 +648,9 @@ function UpdateFromCrestron(data) {
             CustomServiceCall(data)
             return
         }
+        if (config.KeyStrokesEnabled && data.value === 1 && config.KeyStrokes["D" + String(data.join)]) {
+            ks.sendKey(config.KeyStrokes["D" + String(data.join)]);
+        }
     }
     if (data.type === "analog") {
         if (RecievedCache.Analog[data.join] === data.value) return
@@ -713,7 +763,7 @@ ha.connect().then(async () => {
         }
 
         ha.on('state:' + DeviceName, HomeAssistData => {
-            console.log(HomeAssistData)
+            if (config.Debug) { console.log(HomeAssistData) }
             UpdateFromHomeAssistant(DeviceName, HomeAssistData, false)
         })
 
@@ -723,6 +773,8 @@ ha.connect().then(async () => {
         if (config.Debug) { console.log("Recieved " + data.type + " join with ID: " + data.join + " and a value: of " + data.value) } // Debug output
         UpdateFromCrestron(data)
     })
+
+
 })
 
 
