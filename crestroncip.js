@@ -35,7 +35,7 @@ module.exports = {
         const client = new net.Socket();
         let intervalConnect;
         var Cool = false
-        console.log("connecting to " + params.host);
+        //console.log("connecting to " + params.host);
 
         function connect() {
             client.connect({ port: 41794, host: params.host });
@@ -81,17 +81,17 @@ module.exports = {
                 //console.log(payload)
                 switch (payloadType) {
                     case 0x0f:
-                        console.log("Client registration request");
                         client.write("\x01\x00\x0b\x00\x00\x00\x00\x00" + params.ipid + "\x40\xff\xff\xf1\x01");
+                        cipEvents.emit("status", "register request");
                         break;
                     case 0x02:
                         if (payloadLength == 4 && payload.toString('hex') == "0000200f") {
-                            console.log("registration ok");
                             client.write("\x05\x00\x05\x00\x00\x02\x03\x00");
+                            cipEvents.emit("status", "registered");
                         }
                         else if (payloadLength == 3 && payload.toString('hex') == "ffff02") {
-                            console.log("registration failed");
                             client.end();
+                            cipEvents.emit("status", "register failed");
                         }
                         break;
                     case 0x05:
@@ -134,14 +134,14 @@ module.exports = {
         });
 
         client.on('end', () => {
-            console.log('disconnected from server');
+            cipEvents.emit("status", "disconnected");
             launchIntervalConnect();
         });
 
         client.on('close', launchIntervalConnect);
 
         client.on('error', () => {
-            console.log('socket error');
+            cipEvents.emit("status", "socket error");
             launchIntervalConnect();
         });
 
@@ -199,6 +199,11 @@ module.exports = {
             subscribe: (callback) => {
                 cipEvents.on("data", (data) => {
                     callback(data);
+                });
+            },
+            status: (callback) => {
+                cipEvents.on("status", (status) => {
+                    callback(status);
                 });
             }
         }
