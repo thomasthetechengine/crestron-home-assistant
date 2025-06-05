@@ -432,6 +432,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
     //if (DeviceStates[type]) return DeviceStates[type](data, name, type)
     //DeviceStates[type](data, name, type)
     if (!HomeAssistData.new_state) return
+    if(!Entities[Device]) return
     if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && (!HomeAssistData.old_state)) return // Fixes all presses firing when HA resets
     if (HomeAssistData.new_state.state === "on") {
         HACache[Name] = HomeAssistData.new_state
