@@ -1,5 +1,5 @@
 # crestron-home-assistant
-Connects Crestron controllers to Home Assistant via a Node JS Webserver
+Connects Crestron controllers to Home Assistant via a Node JS program
 
 This plugin is designed for both Home Assistant and Crestron to communicate with one another. The feedback and states of entities can be either determined by HA, or the Crestron SIMPL program.
 
