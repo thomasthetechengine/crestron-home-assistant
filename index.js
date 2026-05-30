@@ -11,6 +11,7 @@ var Cache = {} // Cahced devices and joins
 var HACache = {}
 var Entities = config.Entities
 var EntGot = false
+var Start = true
 
 
 // Auto configuration updater
@@ -199,28 +200,10 @@ let ha = new Homeassistant({ // Log into HA
 
 // Connect to Crestron
 
-const cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: CrestronIpId }, () => {
-    //console.log(`Crestron | Connected to ${config.CrestronConfig.Host} with IP ID ${config.CrestronConfig.IPID}`)
-})
+var cip
 
 
-cip.status((status) => { // Incoming data from Crestron
-    if (status === "registered") {
-        console.log(`Crestron | Registered to ${config.CrestronConfig.Host}`)
-    }
-    if (status === "register request") {
-        console.log(`Crestron | Attempting to register to ${config.CrestronConfig.Host}`)
-    }
-    if (status === "register failed") {
-        console.log(`Crestron | Failed to register to ${config.CrestronConfig.Host}`)
-    }
-    if (status === "disconnected") {
-        console.log(`Crestron | Disconnected from ${config.CrestronConfig.Host}`)
-    }
-    if (status === "socket error") {
-        console.log(`Crestron | Socket Error`)
-    }
-})
+
 
 
 async function PulseDigital(Join) { // Setting digital values + debug output
@@ -432,7 +415,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
     //if (DeviceStates[type]) return DeviceStates[type](data, name, type)
     //DeviceStates[type](data, name, type)
     if (!HomeAssistData.new_state) return
-    if(!Entities[Device]) return
+    if (!Entities[Device]) return
     if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && (!HomeAssistData.old_state)) return // Fixes all presses firing when HA resets
     if (HomeAssistData.new_state.state === "on") {
         HACache[Name] = HomeAssistData.new_state
@@ -447,7 +430,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
             if (Join) {
                 if (typeof Join === "string") return;
                 if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context['user_id'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
-                    if (Join.JoinType === "digital") {
+                    if (Join.JoinType === "digital" && !Startup) {
                         const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
                         SetDigital(Join.ID, 1)
                         await sleep(100)
@@ -583,7 +566,7 @@ async function ManuallyUpdateAllFromHA() {
     for (var DeviceName in Entities) { //Subscribe to device changes from HA
         //Startup to grab new states
         var Device = Entities[DeviceName]
-        if (DeviceName && Device && Device["UpdateFrom"] !== null && Device.UpdateFrom === "HomeAssistant") {
+        if (DeviceName && Device && Device["UpdateFrom"] !== null && Device.UpdateFrom === "HomeAssistant" && Device.UpdateFrom !== "Crestron") {
             const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
             await sleep(100)
             var FromHA = ha.state(DeviceName)
@@ -664,6 +647,7 @@ function UpdateFromCrestron(data) {
     }
     FindProperty(data.type, data.join).then(async (Response) => {
         if (typeof Response === "string") return;
+        if (Entities[Response.Device]["UpdateFrom"] !== null && Entities[Response.Device].UpdateFrom === "HomeAssistant" && Start === true) return
         if (typeof Response.Position !== "undefined") {
             DeviceFunctions.PropertyArray(Response, data, Response.Property)
         } else {
@@ -720,6 +704,31 @@ function UpdateFromCrestron(data) {
 
 }
 
+cip = cipclient.connect({ host: config.CrestronConfig.Host, ipid: CrestronIpId })
+
+cip.status((status) => { // Incoming data from Crestron
+    if (status === "registered") {
+        console.log(`Crestron | Registered to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "register request") {
+        console.log(`Crestron | Attempting to register to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "register failed") {
+        console.log(`Crestron | Failed to register to ${config.CrestronConfig.Host}`)
+    }
+    if (status === "disconnected") {
+        console.log(`Crestron | Disconnected from ${config.CrestronConfig.Host}`)
+    }
+    if (status === "socket error") {
+        console.log(`Crestron | Socket Error`)
+    }
+})
+
+cip.subscribe((data) => { // Incoming data from Crestron
+    if (config.Debug) { console.log("Recieved " + data.type + " join with ID: " + data.join + " and a value: of " + data.value) } // Debug output
+    UpdateFromCrestron(data)
+})
+
 // Connecting to HA
 ha.connect().then(async () => {
     console.log(`Home Assistant | Connected to ${config.HomeAssistantConfig.Host} on port ${config.HomeAssistantConfig.Port}`)
@@ -769,12 +778,9 @@ ha.connect().then(async () => {
         })
 
     }
-
-    cip.subscribe((data) => { // Incoming data from Crestron
-        if (config.Debug) { console.log("Recieved " + data.type + " join with ID: " + data.join + " and a value: of " + data.value) } // Debug output
-        UpdateFromCrestron(data)
-    })
-
+    const sleep5 = ms => new Promise(resolve => setTimeout(resolve, ms))
+    await sleep5(1000)
+    Start = false
 
 })
 
