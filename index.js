@@ -1,4 +1,4 @@
-const CrestronIpId = "\x03"
+
 
 //import { createRequire } from "module";
 //const require = createRequire(import.meta.url)
@@ -6,6 +6,7 @@ var config = require('./configuration.json');
 const Homeassistant = require('node-homeassistant')
 const fs = require('fs')
 const cipclient = require('./crestroncip.js');
+const CrestronIpId = String.fromCharCode(parseInt(config.CrestronConfig.IPID, 16));
 
 var Cache = {} // Cahced devices and joins
 var HACache = {}
@@ -307,7 +308,7 @@ const DeviceFunctions = { // Functions per device
             B: null
         }
 
-        if (!CrestronData.type === "analog") return
+        if (CrestronData.type !== "analog") return
         ha.call({
             domain: "light",
             service: "turn_on",
@@ -421,7 +422,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
         HACache[Name] = HomeAssistData.new_state
     } else {
         if (HACache[Name] && HomeAssistData.new_state.state === "off") {
-            HACache[Name].state === "off"
+            HACache[Name].state = "off"
         }
     }
     if (Type === "button" || Type === "input_button") {
@@ -448,7 +449,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
             if (typeof Join === "string") return;
             var value = 0
             if (HomeAssistData.new_state.state === 'on') { value = 1 };
-            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                 if (Join.JoinType === "digital") { SetDigital(Join.ID, value) }
             }
 
@@ -462,7 +463,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
             var JoinType = Value.substring(0, 1)
             var Set
             if (JoinType === "A") {
-                if (Entities[Device]["Ranges"] && Entities[Device].Ranges[ProperMajorPropertyNametyName]) {
+                if (Entities[Device]["Ranges"] && Entities[Device].Ranges[MajorPropertyName]) {
                     Set = convertRange(HomeAssistData.new_state[MajorPropertyName], { min: Entities[Device].Ranges[MajorPropertyName][0], max: Entities[Device].Ranges[MajorPropertyName][1] }, OldRange)
                 } else {
                     Set = HomeAssistData.new_state[MajorPropertyName]
@@ -473,7 +474,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                 if (HomeAssistData.new_state[MajorPropertyName] === true) Set2Init = 1
                 if (HomeAssistData.new_state[MajorPropertyName] === false) Set2Init = 0
             }
-            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                 if (JoinType === "S") { Set = HomeAssistData.new_state[MajorPropertyName]; SetSerial(ID, Set) }
                 if (JoinType === "D") { SetDigital(ID, Set2Init) }
                 if (JoinType === "A") { SetAnalog(ID, Set) }
@@ -498,7 +499,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                                 } else {
                                     Set = HomeAssistData.new_state.attributes[PropertyName][i]
                                 }
-                                if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                                     SetAnalog(ID, Set)
                                 }
 
@@ -507,12 +508,12 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                                 if (JoinType === "D") {
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === true) Set2 = 1
                                     if (HomeAssistData.new_state.attributes[PropertyName][i] === false) Set2 = 0
-                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                                         SetDigital(ID, Set2)
                                     }
 
                                 } else {
-                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                                    if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                                         if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName][i]) }
                                     }
 
@@ -534,7 +535,7 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                         } else {
                             Set = HomeAssistData.new_state.attributes[PropertyName]
                         }
-                        if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                        if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                             SetAnalog(ID, Set)
                         }
                     } else {
@@ -542,11 +543,11 @@ function UpdateFromHomeAssistant(DeviceName, HomeAssistData, Startup) {
                         if (JoinType === "D") {
                             if (HomeAssistData.new_state.attributes[PropertyName] === true) Set2 = 1
                             if (HomeAssistData.new_state.attributes[PropertyName] === false) Set2 = 0
-                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                                 SetDigital(ID, Set2)
                             }
                         } else {
-                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
+                            if (Entities[Device]["UpdateFrom"] !== null && Entities[Device].UpdateFrom === "Crestron" && HomeAssistData.new_state['context'] && HomeAssistData.new_state.context.user_id === config.HomeAssistantConfig.UserID) { } else {
                                 if (JoinType === "S") { SetSerial(ID, HomeAssistData.new_state.attributes[PropertyName]) }
                             }
                         }
