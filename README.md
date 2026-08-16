@@ -10,19 +10,21 @@ Some bits of code are quite messy, and I'm expecting there to be obvious bugs wh
 
 # Crestron Controller Setup
 
-This node js server mimics a crestron panel, in your controller, assign one of your IP ID's to an XPanel, which this node js server will be sending and recieving from. Due to a bug you can only use single digit IP ID numbers.
+This node js server mimics a crestron panel, in your controller, assign one of your IP 's to an XPanel, which this node js server will be sending and recieving from. Due to a bug you can only use single digit IP  numbers.
 
 ![image](https://github.com/user-attachments/assets/11d81a67-4470-4600-83b8-7dd5f78ee713)
 
 When creating analog sliders / inputs on your touch panels, keep the maxmium value to 255, since anything higher breaks the plugin, use the `Ranges` option on your entites in `configuration.json` to convert the value to a different range.
 
+# Fixed Bugs
+
+Now supports 16 bit values and joins
+
+IPID in `configuration.json` is now functional, and you no longer set it in the top of index.js
+
+Fixed a bunch of typos causing occasional runtime crashes
+
 # Known Bugs
-
-Everything is limited to 8 bit, so you can only send and recieve joins 1-255 for digital, serial and analog.
-
-The IP ID of the plugin can only be a singular digit, node js is fussy on how it concantenates hexadecimals, or how its formatted in a json file
-
-Analog values can only be sent from 0 to 255 (8 bit), but can be converted by the plugin using the Ranges option (See configuration examples below)
 
 Updating configuration.json sometimes requires a restart of the plugin to take full effect.
 
@@ -47,7 +49,7 @@ If you want the server to auto restart after a crash / error, install forever
 
 Then to run the server, in your CLI, type `forever .`
 
-# Configuration Guide
+# Configuration Gue
 
 
 EntityGet: Pulls the state of the specified entity, and outputs it to a txt file. Useful for creating configs for devices.
@@ -65,17 +67,17 @@ A = Analog (1-255)
 S = Serial (Strings "Hello there!)
 
 Example
-D1 = Digital Join ID 1
-S4 = Serial Join ID 4
-A9 = Analog Join ID 9
+D1 = Digital Join  1
+S4 = Serial Join  4
+A9 = Analog Join  9
 ```
 
 Entity (Entities):
 ```json
 "switch.example": { -- Needs to match the exact name in HA
             "Type": "switch", -- Type of device
-            "UpdateFrom": "HomeAssistant", -- What end controls this device, if set to HomeAssistant, on startup home assistant will update the joins appropriately. However if you have a device that is controlled by crestron logic, for example a RS232 Relay board, setting this value to Crestron will allow crestron to be the main point of control, and prevent feedback loops. You must also set the UserID in configuration.json aswell.
-            "switch": "D3", -- Which join to link to the switch D = Digtial, 3 = Join ID
+            "UpdateFrom": "HomeAssistant", -- What end controls this device, if set to HomeAssistant, on startup home assistant will update the joins appropriately. However if you have a device that is controlled by crestron logic, for example a RS232 Relay board, setting this value to Crestron will allow crestron to be the main point of control, and prevent feedback loops. You must also set the User in configuration.json aswell.
+            "switch": "D3", -- Which join to link to the switch D = Digtial, 3 = Join 
             "switchtype": "pulse" -- What type of value does the node js server expect from crestron, pulse is for digital joins direct from a button, toggle is for joins that go through a toggle gate
         },
 "light.example": {
@@ -83,11 +85,11 @@ Entity (Entities):
             "UpdateFrom": "HomeAssistant",
             "switch": "D1",
             "switchtype": "pulse",
-            "Attributes": { -- Different types of attributes, dont know your devices attributes? Put your entity ID into EntityGet to learn them!
+            "Attributes": { -- Different types of attributes, dont know your devices attributes? Put your entity  into EntityGet to learn them!
                 "brightness": "A4",
                 "color_temp_kelvin": "A5",
                 "rgb_color": ["A1","A2","A3"], -- R = Analog Join 1, G = Analog Join 2, B = Analog Join 3
-                "effect": "S3" - Serial Join ID 3
+                "effect": "S3" - Serial Join  3
             },
             "Ranges": { -- Analog joins can only send values between 1 and 255, ranges converts the values from crestron back into different specificed numbers.
                 "brightness": [1,255],
