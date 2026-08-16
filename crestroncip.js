@@ -103,21 +103,20 @@ module.exports = {
                                 digital[((((payload[5] & 0x7F) << 8) | payload[4]) + 1)] = (((payload[5] & 0x80) >> 7) ^ 0x01);
                                 cipEvents.emit("data", { type: "digital", join: (((payload[5] & 0x7F) << 8) | payload[4]) + 1, value: (((payload[5] & 0x80) >> 7) ^ 0x01) });
                                 break;
-                            case 0x1:
-                                //console.log("analog join " + (((payload[4] << 8) | payload[5]) + 1) + " value " + ((payload[6] << 8) + payload[7]));
-                                analog[(((payload[4] << 8) | payload[5]) + 1)] = ((payload[6] << 8) + payload[7]);
-                                // cipEvents.emit("data", {type: "analog", join: ((payload[4] << 8) | payload[5]) + 1, value: (payload[6] << 8) + payload[7]});
-                                cipEvents.emit("data", { type: "analog", join: (((payload[5] & 0x7F) << 8) | payload[4]) + 1, value: parseInt(payload[6], 10) });
+                            case 0x1: {
+                                let ajoin = (((payload[5] & 0x7F) << 8) | payload[4]) + 1;
+                                let avalue = (payload.length > 7) ? ((payload[6] << 8) + payload[7]) : payload[6];
+                                analog[ajoin] = avalue;
+                                cipEvents.emit("data", { type: "analog", join: ajoin, value: avalue });
                                 break;
+                            }
                             case 0x02: // SERIAL
-                                var buf = new Buffer(payload, 'hex');
-                                var buftostring = buf.toString('utf-8')
-                                const buf2 = Buffer.from(buftostring, 'utf8');
+                                var buftostring = payload.toString('utf-8')
                                 var split = buftostring.split(",")
                                 var value = split[2].split("\r")[0]
                                 var join = split[1].substring(2)
                                 cipEvents.emit("data", { type: "serial", join: join, value: value });
-                                serial[([join] = value)]
+                                serial[join] = value;
                                 break;
                             case 0x03:
                                 //console.log("update request");
