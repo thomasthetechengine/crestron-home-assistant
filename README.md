@@ -14,7 +14,7 @@ This node js server mimics a crestron panel, in your controller, assign one of y
 
 ![image](https://github.com/user-attachments/assets/11d81a67-4470-4600-83b8-7dd5f78ee713)
 
-When creating analog sliders / inputs on your touch panels, keep the maxmium value to 255, since anything higher breaks the plugin, use the `Ranges` option on your entites in `configuration.json` to convert the value to a different range.
+When creating analog sliders / inputs on your touch panels, use the `Ranges` option on your entites in `configuration.json` to convert the values to a different range. If using ranges its recommended to only send analog join values of 0 to 255, then use ranges to convert it to a different range, for example 2700-6000 for colour temperature control.
 
 # Fixed Bugs
 
